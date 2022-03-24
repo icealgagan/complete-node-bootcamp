@@ -5,19 +5,22 @@ exports.getAllTours = async (req, res) => {
   try {
     //Using filtering and sorting
     // First we need to get the query params_ create a shallow copy
-    const reqObj = { ...req.query };
+    //build the query
+    const queryObj = { ...req.query };
 
     //Mga keys na idedelete natin
     //So if we use .find() hindi sya mapapasama as a filtering key
     const excludedKeys = ['page', 'sort', 'limit', 'fields'];
 
     //We dont want to return a new array so we use forEach
-    excludedKeys.forEach((key) => delete reqObj[key]);
+    excludedKeys.forEach((key) => delete queryObj[key]);
 
     //Now we can pass the query with filtering
     //parang sa mongodb lang na pag get all using .find()
-    const tours = await Tour.find(reqObj);
+    const query = await Tour.find(queryObj);
 
+    //Execute query
+    const tours = await query;
     res.status(200).json({
       status: 'success',
       results: tours.length,
