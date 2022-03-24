@@ -1,126 +1,100 @@
-const fs = require('fs');
-let path = `${__dirname}/../dev-data/data/tours-simple.json`;
-
-const tours = JSON.parse(fs.readFileSync(`${path}`));
-
-exports.checkBody = async (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: 'failed',
-      message: 'Missing Name or Price',
-    });
-  }
-  next();
-};
-
-//ROUTE HANDLERS
-exports.checkID = (req, res, next, val) => {
-  if (req.params.id * 1 > tours.length) {
-    return res.status(400).json({
-      status: 'failed',
-      message: 'No Tour found with this ID',
-    });
-  }
-  next();
-};
+//CONTROLLER - is where all the functions takes place.
+const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
+  try {
+    //Using filtering and sorting
+    // First we need to get the query params_ create a shallow copy
+    const reqObj = { ...req.query };
+
+    //Mga keys na idedelete natin
+    //So if we use .find() hindi sya mapapasama as a filtering key
+    const excludedKeys = ['page', 'sort', 'limit', 'fields'];
+
+    //We dont want to return a new array so we use forEach
+    excludedKeys.forEach((key) => delete reqObj[key]);
+
+    //Now we can pass the query with filtering
+    //parang sa mongodb lang na pag get all using .find()
+    const tours = await Tour.find(reqObj);
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: { tours },
+    });
+  } catch (error) {
+    res.status(400).json(error);
+  }
 };
 
 exports.getTour = async (req, res) => {
   try {
-    const { id } = req.params;
-    //Add + to convert id str to integer
-    const tour = tours.find((el) => el.id === +id);
-    console.log(tour);
+    //Tour.findOne({_id: req.params.id})
+    const tour = await Tour.findById(req.params.id);
 
+    res.status(200).json({
+      status: 'success',
+      data: { tour },
+    });
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
+
+exports.createTour = async (req, res) => {
+  //will create a tour on the database
+  try {
+    const tour = await Tour.create(req.body);
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour,
+      },
+    });
+  } catch (error) {
+    const errorMessage = error.message;
+    console.log(error);
+    res.status(400).json({
+      errorMessage,
+    });
+  }
+};
+
+exports.updateTour = async (req, res) => {
+  try {
+    //:id
+    //new : true is the one that would be returned in the response
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     res.status(200).json({
       status: 'success',
       data: {
         tour,
       },
     });
-  } catch ({ message }) {
-    return res.status(400).json({
-      status: 'failed',
-      message,
-    });
-  }
-};
-
-exports.createTour = async (req, res) => {
-  try {
-    const tourID = tours[tours.length - 1].id + 1;
-
-    //create a new tour object then spread the request data from request body + tourID
-    const tour = { id: tourID, ...req.body };
-    tours.push(tour);
-    //push to our existing tours array
-
-    fs.writeFile(`${path}`, JSON.stringify(tours, null, 4), (err) => {
-      if (err) return console.error(err);
-
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: { ...tour },
-        },
-      });
-    });
   } catch (error) {
-    // console.log(error);
-    res.status(400).json({ error: error.message });
-  }
-};
-
-exports.updateTour = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const keysToUpdate = Object.keys(req.body);
-    //name, duration
-    const tour = tours.find((el) => el.id === +id);
-    // console.log(tour);
-    //Add + to convert id str to integer
-
-    //update value for each
-    keysToUpdate.forEach((key) => {
-      tour[key] = req.body[key];
-    });
-    tours.splice(tour.id, 1, tour);
-
-    return fs.writeFile(`${path}`, JSON.stringify(tours, null, 4), (err) => {
-      res.status(200).json({
-        status: 'success',
-        data: {
-          tour,
-        },
-      });
-    });
-  } catch ({ message }) {
-    return res.status(400).json({
-      status: 'failed',
-      message,
+    const errorMessage = error.message;
+    res.status(400).json({
+      errorMessage,
     });
   }
 };
 
 exports.deleteTour = async (req, res) => {
-  if (!tour) {
-    return res.status(400).json({
-      status: 'failed',
-      message: 'No Tour found with this ID',
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (error) {
+    const errorMessage = error.message;
+    console.log(error);
+    res.status(400).json({
+      errorMessage,
     });
   }
-
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
 };

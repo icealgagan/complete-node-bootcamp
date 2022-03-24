@@ -1,12 +1,33 @@
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
-
 const app = require('./app');
 
-console.log(process.env);
+dotenv.config({ path: './config.env' });
 
-const PORT = process.env.PORT;
+// const DB = process.env.DATABASE.replace(
+//   '<PASSWORD>',
+//   process.env.DATABASE_PASSWORD
+// );
 
-app.listen(PORT, () => {
-  console.log('App running');
+const local = process.env.DATABASE_LOCAL;
+// .connect(DB, {
+async function connectToDB() {
+  try {
+    await mongoose.connect(local, {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+    });
+    console.log('success');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+connectToDB();
+// const { PORT } = process.env.PORT;
+
+app.listen(3000, () => {
+  console.log(`App running on port ${3000}`);
 });
