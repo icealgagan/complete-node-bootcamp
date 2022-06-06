@@ -19,7 +19,7 @@ async function connectToDB() {
       useFindAndModify: false,
       useUnifiedTopology: true,
     });
-    console.log('success');
+    console.log('success connecting to mongodb local');
   } catch (err) {
     console.error(err);
   }

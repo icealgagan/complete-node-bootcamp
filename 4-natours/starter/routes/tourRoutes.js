@@ -8,6 +8,9 @@ const router = express.Router();
 
 //If not send back 400 bad request
 //router.route('/') is basically just server.com/api/v1/tours"/"
+router
+  .route('/5-cheapest-tours')
+  .get(tourController.getCheapestTours, tourController.getAllTours);
 
 router
   .route('/')

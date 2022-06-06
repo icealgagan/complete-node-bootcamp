@@ -46,12 +46,13 @@ const tourSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+    select: false, 
   },
   startDates: [Date],
   images: [String],
 });
 //images [String] array of image str
-
+//select false is just for returning back the field that u want to exclude on the response
 const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
