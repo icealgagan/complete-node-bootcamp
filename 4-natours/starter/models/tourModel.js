@@ -4,6 +4,7 @@ const tourSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'A tour must have a name'],
+    unique: true,
   },
   duration: {
     type: Number,
@@ -46,7 +47,7 @@ const tourSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
-    select: false, 
+    select: false,
   },
   startDates: [Date],
   images: [String],

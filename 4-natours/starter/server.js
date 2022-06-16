@@ -9,11 +9,13 @@ dotenv.config({ path: './config.env' });
 //   process.env.DATABASE_PASSWORD
 // );
 
-const local = process.env.DATABASE_LOCAL;
-// .connect(DB, {
+// const local = process.env.DATABASE_LOCAL;
+const connection = process.env.CONNECTION;
+console.log(connection);
+
 async function connectToDB() {
   try {
-    await mongoose.connect(local, {
+    await mongoose.connect(connection, {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,

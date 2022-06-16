@@ -104,9 +104,9 @@ exports.getAllTours = async (req, res) => {
       if (skip >= totalTours) throw new Error('This page does not exist.');
     }
     //Execute query
-    const features = new APIFeatures(Tour.find(), req.query).filter();
+    const features = new APIFeatures(Tour.find(), req.query);
     const tours = await features.query;
-
+    console.log(query)
     res.status(200).json({
       status: 'success',
       results: tours.length,
