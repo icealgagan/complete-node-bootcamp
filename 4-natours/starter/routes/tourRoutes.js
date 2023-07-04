@@ -23,4 +23,5 @@ router
   .patch(tourController.updateTour)
   .delete(tourController.deleteTour);
 
+//we export the router so we can use it on the app js mounting
 module.exports = router;
